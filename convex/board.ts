@@ -51,6 +51,17 @@ export const remove = mutation({
         }
 
         // TODO: Later check to delete favorite relation as well
+        const userId = identity.subject;
+        const existingFavorite = await ctx.db
+            .query("userFavorites")
+            .withIndex("by_user_board", (q) =>
+                q.eq("userId", userId).eq("boardId", args.id)
+            )
+            .unique();
+        
+        if (existingFavorite) { 
+            await ctx.db.delete(existingFavorite._id);
+        }
 
         await ctx.db.delete(args.id);
     },
@@ -104,15 +115,14 @@ export const favorite = mutation({
         if (!board) {
             throw new Error("Board not found");
         }
-
+        // If a board is already existing in the userFavorites table, this board always belongs to an organization -> That's why we don't need check orgId in index
         const existingFavorite = await ctx.db
             .query("userFavorites")
-            .withIndex("by_user_board_org", (q) =>
+            .withIndex("by_user_board", (q) =>
                 // The order of eq must match with the order in schema
                 q
                     .eq("userId", identity.subject)
                     .eq("boardId", board._id)
-                    .eq("orgId", args.orgId)
             )
             .unique();
 
@@ -146,18 +156,16 @@ export const unfavorite = mutation({
         if (!board) {
             throw new Error("Board not found");
         }
-        
+
         // If a board is already existing in the userFavorites table, this board always belongs to an organization -> That's why we don't need check orgId in index
         const existingFavorite = await ctx.db
             .query("userFavorites")
             .withIndex("by_user_board", (q) =>
-                q
-                    .eq("userId", identity.subject)
-                    .eq("boardId", board._id)
+                q.eq("userId", identity.subject).eq("boardId", board._id)
             )
             .unique();
-        
-        console.log(existingFavorite)
+
+        console.log(existingFavorite);
 
         if (!existingFavorite) {
             throw new Error("Favorited board not found");
