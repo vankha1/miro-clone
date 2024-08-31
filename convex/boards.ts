@@ -2,22 +2,41 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 
 export const get = query({
-  args: {
-    orgId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    args: {
+        orgId: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
 
-    if (!identity) {
-      throw new Error("Unauthorized");
-    }
+        if (!identity) {
+            throw new Error("Unauthorized");
+        }
 
-    const boards = ctx.db
-      .query("boards")
-      .withIndex("by_org") // by_org was created in schema
-      .order("desc")
-      .collect();
+        const boards = ctx.db
+            .query("boards")
+            .withIndex("by_org") // by_org was created in schema
+            .order("desc")
+            .collect();
 
-    return boards;
-  },
+        const boardsWithFavoriteRelation = (await boards).map((board) => {
+            return ctx.db
+                .query("userFavorites")
+                .withIndex("by_user_board", (q) =>
+                    q.eq("userId", identity.subject).eq("boardId", board._id)
+                )
+                .unique()
+                .then((favorite) => {
+                    return {
+                        ...board,
+                        isFavorite: !!favorite,
+                    };
+                });
+        });
+
+        const boardsWithFavoriteBoolean = Promise.all(
+            boardsWithFavoriteRelation
+        );
+
+        return boardsWithFavoriteBoolean;
+    },
 });

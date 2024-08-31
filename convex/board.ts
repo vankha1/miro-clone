@@ -133,7 +133,6 @@ export const favorite = mutation({
 export const unfavorite = mutation({
     args: {
         id: v.id("boards"),
-        orgId: v.string(),
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -147,7 +146,8 @@ export const unfavorite = mutation({
         if (!board) {
             throw new Error("Board not found");
         }
-
+        
+        // If a board is already existing in the userFavorites table, this board always belongs to an organization -> That's why we don't need check orgId in index
         const existingFavorite = await ctx.db
             .query("userFavorites")
             .withIndex("by_user_board", (q) =>
@@ -156,6 +156,8 @@ export const unfavorite = mutation({
                     .eq("boardId", board._id)
             )
             .unique();
+        
+        console.log(existingFavorite)
 
         if (!existingFavorite) {
             throw new Error("Favorited board not found");
