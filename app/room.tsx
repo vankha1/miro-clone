@@ -16,7 +16,7 @@ interface IRoomProps {
 export const Room = ({ children, roomId, fallback }: IRoomProps) => {
     return (
         <LiveblocksProvider
-            publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_CLIENT_ID!}
+            authEndpoint="/api/liveblocks-auth"
         >
             <RoomProvider id={roomId}>
                 <ClientSideSuspense fallback={fallback}>
