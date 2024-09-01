@@ -92,29 +92,34 @@ export type CanvasState =
           mode: CanvasMode.None;
       }
     | {
-        mode: CanvasMode.Pressing;
-        origin: Point;
+          mode: CanvasMode.Pressing;
+          origin: Point;
       }
     | {
-        mode: CanvasMode.SelectionNet;
-        origin: Point; // The point where the selection net started
-        current?: Point; // The current point of the selection net
+          mode: CanvasMode.SelectionNet;
+          origin: Point; // The point where the selection net started
+          current?: Point; // The current point of the selection net
       }
     | {
-        mode: CanvasMode.Transalating;
-        current: Point;
+          mode: CanvasMode.Transalating;
+          current: Point;
       }
     | {
-        mode: CanvasMode.Inserting;
-        layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Text | LayerType.Note | LayerType.Path;
+          mode: CanvasMode.Inserting;
+          layerType:
+              | LayerType.Ellipse
+              | LayerType.Rectangle
+              | LayerType.Text
+              | LayerType.Note
+              | LayerType.Path;
       }
     | {
-        mode: CanvasMode.Resizing;
-        initialBounds: XYWH;
-        corner: Side;
+          mode: CanvasMode.Resizing;
+          initialBounds: XYWH;
+          corner: Side;
       }
     | {
-        mode: CanvasMode.Pencil;
+          mode: CanvasMode.Pencil;
       };
 
 export enum CanvasMode {
@@ -126,3 +131,10 @@ export enum CanvasMode {
     Resizing,
     Pencil,
 }
+
+export type Layer =
+    | RectangleLayer
+    | EllipseLayer
+    | TextLayer
+    | NoteLayer
+    | PathLayer;

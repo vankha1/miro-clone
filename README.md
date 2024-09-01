@@ -2,8 +2,8 @@
 
 Command line used in this commit: 
 
-* Install avatar shadcn-ui:
+* Install nanoid:
 
 ```bash
-    npx shadcn@latest add avatar
+    npm install nanoid
 ```
