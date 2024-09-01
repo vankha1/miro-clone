@@ -15,10 +15,13 @@ interface IRoomProps {
 
 export const Room = ({ children, roomId, fallback }: IRoomProps) => {
     return (
-        <LiveblocksProvider
-            authEndpoint="/api/liveblocks-auth"
-        >
-            <RoomProvider id={roomId}>
+        <LiveblocksProvider authEndpoint="/api/liveblocks-auth" throttle={16}>
+            <RoomProvider
+                id={roomId}
+                initialPresence={{
+                    cursor: null,
+                }}
+            >
                 <ClientSideSuspense fallback={fallback}>
                     {children}
                 </ClientSideSuspense>
