@@ -3,7 +3,6 @@ import { auth, currentUser } from "@clerk/nextjs";
 import { Liveblocks } from "@liveblocks/node";
 import { ConvexHttpClient } from "convex/browser";
 
-console.log(process.env.NEXT_PUBLIC_LIVEBLOCKS_SECRET_KEY);
 const liveblocks = new Liveblocks({
     secret: process.env.NEXT_PUBLIC_LIVEBLOCKS_SECRET_KEY!,
 });

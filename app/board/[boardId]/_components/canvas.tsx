@@ -14,7 +14,7 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
     
     return (
         <main className="w-full h-full relative bg-neutral-100 touch-none">
-            <Info />
+            <Info boardId={boardId} />
             <Participants />
             <Toolbar />
         </main>
