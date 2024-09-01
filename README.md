@@ -1,9 +1,9 @@
 # Miro clone
 
-Authentication with liveblocks:
+Command line used in this commit: 
 
-* Set up link: `https://liveblocks.io/docs/authentication/access-token/nextjs`
+* Install avatar shadcn-ui:
 
 ```bash
-npm install @liveblocks/node
+    npx shadcn@latest add avatar
 ```
