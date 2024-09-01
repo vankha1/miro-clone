@@ -1,17 +1,6 @@
 "use client";
 
-import {
-    useHistory,
-    useCanRedo,
-    useCanUndo,
-    useMyPresence,
-    useStorage,
-    useMutation,
-} from "@liveblocks/react/suspense";
-import { Info } from "./info";
-import { Participants } from "./participants";
-import { Toolbar } from "./toolbar";
-import { useCallback, useState } from "react";
+import { pointerEventToCanvasPoint } from "@/lib/utils";
 import {
     Camera,
     CanvasMode,
@@ -20,10 +9,20 @@ import {
     LayerType,
     Point,
 } from "@/types/canvas";
-import { CursorsPresence } from "./cursors-presence";
-import { pointerEventToCanvasPoint } from "@/lib/utils";
-import { nanoid } from "nanoid";
 import { LiveObject } from "@liveblocks/client";
+import {
+    useCanRedo,
+    useCanUndo,
+    useHistory,
+    useMutation,
+    useStorage
+} from "@liveblocks/react/suspense";
+import { nanoid } from "nanoid";
+import { useCallback, useState } from "react";
+import { CursorsPresence } from "./cursors-presence";
+import { Info } from "./info";
+import { Participants } from "./participants";
+import { Toolbar } from "./toolbar";
 
 const MAX_LAYERS = 100;
 
@@ -39,7 +38,6 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
     });
 
     const [camera, setCamera] = useState<Camera>({ x: 0, y: 0 });
-    const [myPresence, updateMyPresence] = useMyPresence();
     const [lastUsedColor, setLastUsedColor] = useState<Color>({
         r: 0,
         g: 0,
@@ -94,15 +92,18 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
         }));
     }, []);
 
-    const onPointerMove = (e: React.PointerEvent) => {
-        const current = pointerEventToCanvasPoint(e, camera);
+    const onPointerMove = useMutation(
+        ({ setMyPresence }, e: React.PointerEvent) => {
+            e.preventDefault();
+            const current = pointerEventToCanvasPoint(e, camera);
+            setMyPresence({ cursor: current });
+        },
+        []
+    );
 
-        updateMyPresence({ cursor: current });
-    };
-
-    const onPointerLeave = () => {
-        updateMyPresence({ cursor: null });
-    };
+    const onPointerLeave = useMutation(({ setMyPresence }) => {
+        setMyPresence({ cursor: null });
+    }, []);
 
     return (
         <main className="w-full h-full relative bg-neutral-100 touch-none">
