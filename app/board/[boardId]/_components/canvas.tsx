@@ -1,6 +1,6 @@
 "use client";
 
-import { connectionIdToColor, pointerEventToCanvasPoint } from "@/lib/utils";
+import { connectionIdToColor, pointerEventToCanvasPoint, resizeBounds } from "@/lib/utils";
 import {
     Camera,
     CanvasMode,
@@ -8,6 +8,8 @@ import {
     Color,
     LayerType,
     Point,
+    Side,
+    XYWH,
 } from "@/types/canvas";
 import { LiveObject } from "@liveblocks/client";
 import {
@@ -88,6 +90,37 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
         [lastUsedColor]
     );
 
+    const resizeSelectedLayer = useMutation(({ storage, self }, point: Point) => {
+        if (canvasState.mode !== CanvasMode.Resizing) {
+            return;
+        }
+
+        const bounds = resizeBounds(canvasState.initialBounds, canvasState.corner, point);
+
+        const liveLayers = storage.get("layers");
+        const layer = liveLayers.get(self.presence.selection[0]);
+
+        if (layer) { 
+            layer.update(bounds);
+        }
+    }, [canvasState])
+
+    const onResizeHandlePointerDown = useCallback(
+        (corner: Side, initialBounds: XYWH) => {
+            console.log({
+                corner,
+                initialBounds
+            })
+            history.pause();
+            setCanvasState({
+                mode: CanvasMode.Resizing,
+                corner,
+                initialBounds,
+            });
+        },
+        [history]
+    );
+
     const onWheel = useCallback((e: React.WheelEvent) => {
         setCamera((camera) => ({
             x: camera.x - e.deltaX,
@@ -99,9 +132,14 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
         ({ setMyPresence }, e: React.PointerEvent) => {
             e.preventDefault();
             const current = pointerEventToCanvasPoint(e, camera);
+
+            if (canvasState.mode === CanvasMode.Resizing) {
+                resizeSelectedLayer(current)
+            }
+
             setMyPresence({ cursor: current });
         },
-        []
+        [camera, canvasState, resizeSelectedLayer]
     );
 
     const onPointerLeave = useMutation(({ setMyPresence }) => {
@@ -202,7 +240,7 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
                     ))}
 
                     <SelectionBox
-                        onResizeHandlePointerDown={() => { }}
+                        onResizeHandlePointerDown={onResizeHandlePointerDown}
                     />
                     <CursorsPresence />
                 </g>
