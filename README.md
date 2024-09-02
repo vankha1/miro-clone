@@ -2,8 +2,8 @@
 
 Command line used in this commit:
 
-- Install react-contenteditable:
+- Install `perfect-freehand` to beautifully render stokes:
 
 ```bash
-    npm i react-contenteditable
+    npm install perfect-freehand
 ```
