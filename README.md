@@ -1,9 +1,17 @@
 # Miro clone
 
-Command line used in this commit:
+## How to run
 
-- Install `perfect-freehand` to beautifully render stokes:
+- Clone the repository: `https://github.com/vankha1/miro-clone.git`
+- Install dependencies:
 
 ```bash
-    npm install perfect-freehand
+npm install
+```
+
+- Run command:
+
+```bash
+npm run dev
+npx convex run
 ```
