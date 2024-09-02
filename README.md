@@ -1,9 +1,9 @@
 # Miro clone
 
-Command line used in this commit: 
+Command line used in this commit:
 
-* Install nanoid:
+- Install react-contenteditable:
 
 ```bash
-    npm install nanoid
+    npm i react-contenteditable
 ```
