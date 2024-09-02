@@ -1,6 +1,10 @@
 "use client";
 
-import { connectionIdToColor, pointerEventToCanvasPoint, resizeBounds } from "@/lib/utils";
+import {
+    connectionIdToColor,
+    pointerEventToCanvasPoint,
+    resizeBounds,
+} from "@/lib/utils";
 import {
     Camera,
     CanvasMode,
@@ -90,27 +94,63 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
         [lastUsedColor]
     );
 
-    const resizeSelectedLayer = useMutation(({ storage, self }, point: Point) => {
-        if (canvasState.mode !== CanvasMode.Resizing) {
-            return;
-        }
+    const translateSelectedLayers = useMutation(
+        ({ storage, self }, point: Point) => {
+            if (canvasState.mode !== CanvasMode.Transalating) {
+                return;
+            }
 
-        const bounds = resizeBounds(canvasState.initialBounds, canvasState.corner, point);
+            const offset = {
+                x: point.x - canvasState.current.x,
+                y: point.y - canvasState.current.y,
+            };
 
-        const liveLayers = storage.get("layers");
-        const layer = liveLayers.get(self.presence.selection[0]);
+            const liveLayers = storage.get("layers");
 
-        if (layer) { 
-            layer.update(bounds);
-        }
-    }, [canvasState])
+            for (const id of self.presence.selection) {
+                const layer = liveLayers.get(id);
+
+                if (layer) {
+                    layer.update({
+                        x: layer.get("x") + offset.x,
+                        y: layer.get("y") + offset.y,
+                    });
+                }
+            }
+
+            setCanvasState({ mode: CanvasMode.Transalating, current: point });
+        },
+        [canvasState]
+    );
+
+    const resizeSelectedLayer = useMutation(
+        ({ storage, self }, point: Point) => {
+            if (canvasState.mode !== CanvasMode.Resizing) {
+                return;
+            }
+
+            const bounds = resizeBounds(
+                canvasState.initialBounds,
+                canvasState.corner,
+                point
+            );
+
+            const liveLayers = storage.get("layers");
+            const layer = liveLayers.get(self.presence.selection[0]);
+
+            if (layer) {
+                layer.update(bounds);
+            }
+        },
+        [canvasState]
+    );
 
     const onResizeHandlePointerDown = useCallback(
         (corner: Side, initialBounds: XYWH) => {
             console.log({
                 corner,
-                initialBounds
-            })
+                initialBounds,
+            });
             history.pause();
             setCanvasState({
                 mode: CanvasMode.Resizing,
@@ -133,13 +173,15 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
             e.preventDefault();
             const current = pointerEventToCanvasPoint(e, camera);
 
-            if (canvasState.mode === CanvasMode.Resizing) {
-                resizeSelectedLayer(current)
+            if (canvasState.mode === CanvasMode.Transalating) {
+                translateSelectedLayers(current);
+            } else if (canvasState.mode === CanvasMode.Resizing) {
+                resizeSelectedLayer(current);
             }
 
             setMyPresence({ cursor: current });
         },
-        [camera, canvasState, resizeSelectedLayer]
+        [camera, canvasState, resizeSelectedLayer, translateSelectedLayers]
     );
 
     const onPointerLeave = useMutation(({ setMyPresence }) => {
