@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    colorToCss,
     connectionIdToColor,
     findIntersectingLayersWithRectangle,
     penPointsToPathLayer,
@@ -24,6 +25,7 @@ import {
     useHistory,
     useMutation,
     useOthersMapped,
+    useSelf,
     useStorage,
 } from "@liveblocks/react/suspense";
 import { nanoid } from "nanoid";
@@ -35,6 +37,7 @@ import { Toolbar } from "./toolbar";
 import { LayerPreview } from "./layer-preview";
 import { SelectionBox } from "./selection-box";
 import { SelectionTools } from "./selection-tools";
+import { Path } from "./path";
 
 const MAX_LAYERS = 100;
 
@@ -45,6 +48,7 @@ interface ICanvasProps {
 export const Canvas = ({ boardId }: ICanvasProps) => {
     const layerIds = useStorage((root) => root.layerIds);
 
+    const pencilDraft = useSelf((me) => me.presence.pencilDraft);
     const [canvasState, setCanvasState] = useState<CanvasState>({
         mode: CanvasMode.None,
     });
@@ -471,6 +475,15 @@ export const Canvas = ({ boardId }: ICanvasProps) => {
                         )}
 
                     <CursorsPresence />
+
+                    {pencilDraft != null && pencilDraft.length > 0 && (
+                        <Path
+                            points={pencilDraft}
+                            fill={colorToCss(lastUsedColor)}
+                            x={0}
+                            y={0}
+                        />
+                    )}
                 </g>
             </svg>
         </main>
